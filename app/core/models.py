@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                         PermissionsMixin
 
 class UserManager(BaseUserManager):
+    """Custom user management functions"""
 
     def create_user(self, email, password=None, **extra_fields):
         """Create a user with email and password"""
@@ -25,6 +26,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model the supports using email instead of username"""
+    
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
