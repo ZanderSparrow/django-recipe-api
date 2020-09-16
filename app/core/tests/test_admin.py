@@ -35,7 +35,6 @@ class AdminSiteTests(TestCase):
 
         self.assertEqual(res.status_code, 200)
 
-
     def test_create_user_page(self):
         """Tests creating a new user in admin CMS"""
         url = reverse('admin:core_user_add')
