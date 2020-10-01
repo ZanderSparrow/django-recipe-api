@@ -17,13 +17,16 @@ def detail_url(recipe_id):
     """Return a url for given recipe id"""
     return reverse('recipe:recipe-detail', args=[recipe_id])
 
+
 def sample_ingredient(user, name='Lavender'):
     """Create a sample ingredient"""
     return Ingredient.objects.create(user=user, name=name)
 
+
 def sample_tag(user, name='Pastry'):
     """Create a sample tag"""
     return Tag.objects.create(user=user, name=name)
+
 
 def sample_recipe(user, **params):
     """Create and return a sample recipe"""
