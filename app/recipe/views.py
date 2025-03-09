@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from core.models import Ingredient, Recipe, Tag
@@ -50,7 +50,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = serializers.RecipeSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes_by_action = {
+       'create': [IsAuthenticated],
+       'update': [IsAuthenticated],
+       'partial_update': [IsAuthenticated],
+       'destroy': [IsAuthenticated],
+       'list': [AllowAny],
+       'retrieve': [AllowAny]
+    }
+
+    def get_permissions(self):
+        try:
+            return [permission() for permission in self.permission_classes_by_action[self.action]]
+        except KeyError:
+            return [permission() for permission in self.permission_classes]
 
     def _params_to_ints(self, qs):
         """Private function to convert string IDs to ints"""
@@ -60,6 +73,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Only return recipes for current user"""
         tags = self.request.query_params.get('tags')
         ingredients = self.request.query_params.get('ingredients')
+        author = self.request.query_params.get('user')
         queryset = self.queryset
         if tags:
             tag_ids = self._params_to_ints(tags)
@@ -67,8 +81,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if ingredients:
             ingredient_ids = self._params_to_ints(ingredients)
             queryset = queryset.filter(ingredients__id__in=ingredient_ids)
+        if author:
+            queryset = queryset.filter(user=author)
 
-        return queryset.filter(user=self.request.user).order_by('-id')
+        return queryset.order_by('-id')
 
     def get_serializer_class(self):
         """Use different serializer for list versus detail"""
